@@ -1,26 +1,37 @@
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
+import { AuthProvider } from './context/AuthContext'
 import MainLayout from './layouts/MainLayout'
+import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import AdminEmployeesPage from './pages/AdminEmployeesPage'
+import EmployeeDetailPage from './pages/EmployeeDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
     <ThemeProvider>
-      <Routes>
-        {/* Public pages with Navbar + Footer */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-        </Route>
+      <AuthProvider>
+        <Routes>
+          {/* Public pages with Navbar + Footer */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+            {/* Protected pages (still use Navbar + Footer layout) */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin/employees" element={<AdminEmployeesPage />} />
+              <Route path="/admin/employees/:id" element={<EmployeeDetailPage />} />
+            </Route>
+          </Route>
 
-        {/* Auth pages — full-screen, no layout */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          {/* Auth pages — full-screen, no layout */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
