@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import useWindowTitle from '../hooks/useWindowTitle'
+import { useAuth } from '../context/AuthContext'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -21,11 +22,14 @@ function validate(fields) {
 
 function LoginPage() {
   useWindowTitle('Employee Login | AnkaBanka')
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const [fields, setFields] = useState({ email: '', password: '' })
   const [touched, setTouched] = useState({ email: false, password: false })
   const [submitted, setSubmitted] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [authError, setAuthError] = useState(null)
 
   const errors = validate(fields)
   const visibleErrors = {
@@ -45,8 +49,12 @@ function LoginPage() {
     e.preventDefault()
     setSubmitted(true)
     if (Object.keys(errors).length > 0) return
-    // TODO: call auth service
-    console.log('Login submitted:', fields)
+    const ok = login(fields.email, fields.password)
+    if (ok) {
+      navigate('/')
+    } else {
+      setAuthError('Invalid email or password.')
+    }
   }
 
   return (
@@ -146,6 +154,9 @@ function LoginPage() {
             <button type="submit" className="btn-primary w-full mt-2">
               Sign In
             </button>
+            {authError && (
+              <p className="text-xs text-red-500 text-center">{authError}</p>
+            )}
           </form>
         </div>
       </div>

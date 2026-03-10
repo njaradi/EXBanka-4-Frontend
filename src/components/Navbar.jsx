@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
-
-const navLinks = [
-  { to: '/', label: 'Home' },
-]
+import { useAuth } from '../context/AuthContext'
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { dark, toggle } = useTheme()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/')
+    setMenuOpen(false)
+  }
 
   const linkClass = ({ isActive }) =>
     `relative text-xs tracking-widest uppercase font-medium pb-1 transition-colors duration-150 ${
@@ -33,16 +38,10 @@ function Navbar() {
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={linkClass}
-                end={link.to === '/'}
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            <NavLink to="/" className={linkClass} end>Home</NavLink>
+            {user && (
+              <NavLink to="/admin/employees" className={linkClass}>Employees</NavLink>
+            )}
           </div>
 
           {/* Desktop CTA */}
@@ -62,12 +61,21 @@ function Navbar() {
                 </svg>
               )}
             </button>
-            <Link
-              to="/login"
-              className="px-5 py-2 border border-violet-600 dark:border-violet-400 text-violet-600 dark:text-violet-400 text-xs tracking-widest uppercase font-medium hover:bg-violet-600 dark:hover:bg-violet-500 hover:text-white transition-all duration-200"
-            >
-              Employee Login
-            </Link>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="px-5 py-2 border border-violet-600 dark:border-violet-400 text-violet-600 dark:text-violet-400 text-xs tracking-widest uppercase font-medium hover:bg-violet-600 dark:hover:bg-violet-500 hover:text-white transition-all duration-200"
+              >
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="px-5 py-2 border border-violet-600 dark:border-violet-400 text-violet-600 dark:text-violet-400 text-xs tracking-widest uppercase font-medium hover:bg-violet-600 dark:hover:bg-violet-500 hover:text-white transition-all duration-200"
+              >
+                Employee Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -89,17 +97,10 @@ function Navbar() {
         {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-slate-100 dark:border-slate-800 py-4 flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={linkClass}
-                end={link.to === '/'}
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            <NavLink to="/" className={linkClass} end onClick={() => setMenuOpen(false)}>Home</NavLink>
+            {user && (
+              <NavLink to="/admin/employees" className={linkClass} onClick={() => setMenuOpen(false)}>Employees</NavLink>
+            )}
             <div className="flex items-center gap-4">
               <button
                 onClick={toggle}
@@ -116,13 +117,22 @@ function Navbar() {
                   </svg>
                 )}
               </button>
-              <Link
-                to="/login"
-                className="text-xs tracking-widest uppercase font-medium text-violet-600 dark:text-violet-400"
-                onClick={() => setMenuOpen(false)}
-              >
-                Employee Login
-              </Link>
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-xs tracking-widest uppercase font-medium text-violet-600 dark:text-violet-400"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-xs tracking-widest uppercase font-medium text-violet-600 dark:text-violet-400"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Employee Login
+                </Link>
+              )}
             </div>
           </div>
         )}
