@@ -25,4 +25,9 @@ export const clientPortfolioService = {
     const { data } = await clientApiClient.post(`/investment/funds/${fundId}/withdraw`, { destinationAccountId, amount })
     return data
   },
+
+  async setPublicMode(ticker, isPublic) {
+    const { data } = await clientApiClient.put(`/client/portfolio/${ticker}/public-mode`, { isPublic })
+    return data
+  },
 }
