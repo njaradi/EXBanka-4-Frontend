@@ -65,8 +65,8 @@ export default function OtcNegotiationDetailPage() {
 
   const userId = user?.id
   const isMyTurn = neg &&
-    ((neg.status === 'PENDING_SELLER' && neg.sellerId === userId) ||
-     (neg.status === 'PENDING_BUYER'  && neg.buyerId  === userId))
+    ((neg.status === 'PENDING_SELLER' && neg.sellerType === 'EMPLOYEE' && neg.sellerId === userId) ||
+     (neg.status === 'PENDING_BUYER'  && neg.buyerType  === 'EMPLOYEE' && neg.buyerId  === userId))
 
   function apiError(err, fallback) {
     return err?.response?.data?.error || fallback

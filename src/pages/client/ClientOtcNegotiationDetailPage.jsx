@@ -66,8 +66,8 @@ export default function ClientOtcNegotiationDetailPage() {
 
   const userId = clientUser?.id
   const isMyTurn = neg &&
-    ((neg.status === 'PENDING_SELLER' && neg.sellerId === userId) ||
-     (neg.status === 'PENDING_BUYER'  && neg.buyerId  === userId))
+    ((neg.status === 'PENDING_SELLER' && neg.sellerType === 'CLIENT' && neg.sellerId === userId) ||
+     (neg.status === 'PENDING_BUYER'  && neg.buyerType  === 'CLIENT' && neg.buyerId  === userId))
 
   const [accepted, setAccepted] = useState(false)
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import useWindowTitle from '../../hooks/useWindowTitle'
 import { otcService } from '../../services/otcService'
 import { fmt, fmtDateTime } from '../../utils/formatting'
@@ -138,6 +139,7 @@ function OfferModal({ item, onClose, onSubmit }) {
 
 export default function OtcMarketPage() {
   useWindowTitle('OTC Market | AnkaBanka')
+  const navigate = useNavigate()
 
   const [items,      setItems]      = useState([])
   const [loading,    setLoading]    = useState(true)
@@ -155,6 +157,7 @@ export default function OtcMarketPage() {
 
   async function handleOffer(payload) {
     await otcService.createNegotiation(payload)
+    navigate('/otc/negotiations')
   }
 
   function thClass() {
