@@ -30,6 +30,9 @@ function DepositModal({ position, onClose, onSuccess }) {
   async function handleSubmit() {
     const n = Number(amount)
     if (!amount || isNaN(n) || n <= 0) { setAmountError('Please enter a valid amount.'); return }
+    if (position.minimumContribution && n < position.minimumContribution) {
+      setAmountError(`Minimum contribution is ${fmt(position.minimumContribution, 'RSD')}.`); return
+    }
     setAmountError('')
     setSubmitting(true)
     try {
@@ -60,6 +63,9 @@ function DepositModal({ position, onClose, onSuccess }) {
               placeholder="0.00"
               className={`input-field w-full text-sm${amountError ? ' input-error' : ''}`}
             />
+            {position.minimumContribution > 0 && !amountError && (
+              <p className="text-xs text-slate-400 mt-1">Minimum: {fmt(position.minimumContribution, 'RSD')}</p>
+            )}
             {amountError && <p className="text-xs text-red-500 mt-1">{amountError}</p>}
           </div>
           <div>
@@ -185,10 +191,11 @@ export default function BankProfitFundPositionsPage() {
 
   if (!can('isSupervisor')) return <Navigate to="/" replace />
 
-  const [positions,  setPositions]  = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(false)
-  const [modal,      setModal]      = useState(null) // { type: 'deposit'|'withdraw', position }
+  const [positions,   setPositions]  = useState([])
+  const [loading,     setLoading]    = useState(true)
+  const [error,       setError]      = useState(false)
+  const [modal,       setModal]      = useState(null) // { type: 'deposit'|'withdraw', position }
+  const [successMsg,  setSuccessMsg] = useState('')
 
   async function load() {
     setLoading(true)
@@ -204,12 +211,13 @@ export default function BankProfitFundPositionsPage() {
         .map(f => {
           const pos = posMap.get(f.id)
           return {
-            fundId:           f.id,
-            fundName:         f.name,
-            managerName:      f.managerName ?? pos?.managerName ?? '—',
-            bankSharePercent: pos?.bankSharePercent ?? 0,
-            bankShareRSD:     pos?.bankShareRSD     ?? 0,
-            profitRSD:        pos?.profitRSD        ?? 0,
+            fundId:              f.id,
+            fundName:            f.name,
+            managerName:         f.managerName ?? pos?.managerName ?? '—',
+            bankSharePercent:    pos?.bankSharePercent ?? 0,
+            bankShareRSD:        pos?.bankShareRSD     ?? 0,
+            profitRSD:           pos?.profitRSD        ?? 0,
+            minimumContribution: f.minimumContribution ?? 0,
           }
         })
       setPositions(rows)
@@ -224,6 +232,7 @@ export default function BankProfitFundPositionsPage() {
 
   function handleModalSuccess() {
     setModal(null)
+    setSuccessMsg('Success!')
     load()
   }
 
@@ -253,6 +262,10 @@ export default function BankProfitFundPositionsPage() {
           </NavLink>
         </div>
 
+        {successMsg && (
+          <p className="text-emerald-600 dark:text-emerald-400 text-sm mb-4">{successMsg}</p>
+        )}
+
         {/* Table */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           {loading ? (
@@ -272,7 +285,7 @@ export default function BankProfitFundPositionsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    {['Fund', 'Manager', 'Bank Share %', 'Bank Share (RSD)', 'Profit (RSD)', 'Actions'].map(h => (
+                    {['Fund', 'Manager', 'Bank Share %', 'Bank Share (RSD)', 'Profit (RSD)', 'Min. Contribution', 'Actions'].map(h => (
                       <th key={h} className="px-4 py-4 text-left text-xs tracking-widest uppercase text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
                         {h}
                       </th>
@@ -309,16 +322,19 @@ export default function BankProfitFundPositionsPage() {
                       }`}>
                         {pos.profitRSD != null ? fmt(pos.profitRSD, 'RSD') : '—'}
                       </td>
+                      <td className="px-4 py-3 text-slate-500 dark:text-slate-400 tabular-nums text-xs">
+                        {pos.minimumContribution > 0 ? fmt(pos.minimumContribution, 'RSD') : '—'}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
                           <button
-                            onClick={() => setModal({ type: 'deposit', position: pos })}
+                            onClick={() => { setSuccessMsg(''); setModal({ type: 'deposit', position: pos }) }}
                             className="btn-primary text-xs px-3 py-1"
                           >
                             Invest
                           </button>
                           <button
-                            onClick={() => setModal({ type: 'withdraw', position: pos })}
+                            onClick={() => { setSuccessMsg(''); setModal({ type: 'withdraw', position: pos }) }}
                             className="px-3 py-1.5 text-xs tracking-widest uppercase font-medium border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors"
                           >
                             Withdraw

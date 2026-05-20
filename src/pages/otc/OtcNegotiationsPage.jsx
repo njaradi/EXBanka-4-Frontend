@@ -18,8 +18,8 @@ function getPriceColor(price, market) {
 
 function getStatusLabel(neg, userId) {
   const myTurn =
-    (neg.status === 'PENDING_SELLER' && neg.sellerId === userId) ||
-    (neg.status === 'PENDING_BUYER'  && neg.buyerId  === userId)
+    (neg.status === 'PENDING_SELLER' && neg.sellerType === 'EMPLOYEE' && neg.sellerId === userId) ||
+    (neg.status === 'PENDING_BUYER'  && neg.buyerType  === 'EMPLOYEE' && neg.buyerId  === userId)
   return myTurn ? 'Your turn' : 'Waiting for the other party'
 }
 
@@ -169,7 +169,7 @@ export default function OtcNegotiationsPage() {
                             {fmt(neg.pricePerStock)}
                           </td>
                           <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
-                            {neg.settlementDate ?? '—'}
+                            {fmtDate(neg.settlementDate)}
                           </td>
                           <td className="px-4 py-3 text-slate-700 dark:text-slate-300 tabular-nums">
                             {fmt(neg.premium)}

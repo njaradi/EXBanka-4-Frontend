@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import useWindowTitle from '../../hooks/useWindowTitle'
+import { useAuth } from '../../context/AuthContext'
 import { otcService } from '../../services/otcService'
-import { fmt } from '../../utils/formatting'
+import { fmt, fmtDate } from '../../utils/formatting'
 
 const TABS = [
   { label: 'Valid',   key: 'ACTIVE' },
@@ -84,6 +85,7 @@ function ExerciseModal({ contract, onClose, onConfirm }) {
 
 export default function OtcContractsPage() {
   useWindowTitle('OTC Contracts | AnkaBanka')
+  const { user } = useAuth()
 
   const [contracts,    setContracts]    = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -191,7 +193,7 @@ export default function OtcContractsPage() {
                         <td className="px-4 py-3 text-slate-700 dark:text-slate-300 tabular-nums">{c.amount}</td>
                         <td className="px-4 py-3 text-slate-700 dark:text-slate-300 tabular-nums">{fmt(c.strikePrice)}</td>
                         <td className="px-4 py-3 text-slate-700 dark:text-slate-300 tabular-nums">{fmt(c.premium)}</td>
-                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs whitespace-nowrap">{c.settlementDate ?? '—'}</td>
+                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs whitespace-nowrap">{fmtDate(c.settlementDate)}</td>
                         <td className="px-4 py-3 text-slate-700 dark:text-slate-300 text-xs">
                           <div>{c.sellerName ?? '—'}</div>
                         </td>
@@ -205,7 +207,7 @@ export default function OtcContractsPage() {
                           {c.profit != null ? `${c.profit >= 0 ? '+' : ''}${fmt(c.profit)}` : '—'}
                         </td>
                         <td className="px-4 py-3">
-                          {c.status === 'ACTIVE' && (
+                          {c.status === 'ACTIVE' && c.buyerType === 'EMPLOYEE' && c.buyerId === user?.id && (
                             <button
                               onClick={() => setExerciseItem(c)}
                               className="btn-primary text-xs px-3 py-1"
